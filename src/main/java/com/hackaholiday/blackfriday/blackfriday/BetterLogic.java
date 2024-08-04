@@ -31,23 +31,6 @@ public class BetterLogic extends Logic {
     private List<String> categories;
     private ConcurrentHashMap<String, List<Products>> categoriesMap = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    public void postConstruct() {
-        executor.execute(new Runnable() {
-            public void run() {
-
-                System.out.println("Categories chaching");
-                categories = BetterLogic.super.getCategories();
-                System.out.println("Categories ready");
-                for (String categoryNameString : categories) {
-                    categoriesMap.put(categoryNameString, BetterLogic.super.getCategory(categoryNameString));
-                    System.out.println("Category '" + categoryNameString + "' is ready. " + categoriesMap.size() + "/"
-                            + categories.size());
-                }
-            }
-        });
-    }
-
     @Override
     public List<String> getCategories() {
         if (categories == null)
@@ -62,6 +45,33 @@ public class BetterLogic extends Logic {
         if (list == null)
             categoriesMap.put(categoryName, super.getCategory(categoryName));
         return categoriesMap.get(categoryName);
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        executor.execute(new Runnable() {
+            public void run() {
+
+                System.out.println("Categories chaching");
+                long time = System.currentTimeMillis();
+                categories = BetterLogic.super.getCategories();
+                System.out.println("Categories ready " + (System.currentTimeMillis() - time) / 1000 + "s");
+
+                for (String categoryNameString : categories) {
+
+                    executor.execute(new Runnable() {
+                        public void run() {
+                            long time = System.currentTimeMillis();
+                            categoriesMap.put(categoryNameString, BetterLogic.super.getCategory(categoryNameString));
+                            System.out.println("Category '" + categoryNameString + "' is ready. " + categoriesMap.size()
+                                    + "/"
+                                    + categories.size() + " " + (System.currentTimeMillis() - time) / 1000 + "s");
+
+                        }
+                    });
+                }
+            }
+        });
     }
 
 }
