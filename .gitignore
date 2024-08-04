@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+blackfriday.tar
+blackfriday*.7z
+blackfriday*.zip
