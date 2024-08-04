@@ -35,3 +35,5 @@ build/
 blackfriday.tar
 blackfriday*.7z
 blackfriday*.zip
+pgadmin_data/*
+postgresql_data/
